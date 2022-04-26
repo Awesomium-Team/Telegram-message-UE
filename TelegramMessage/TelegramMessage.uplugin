@@ -1,0 +1,39 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.8.0",
+	"FriendlyName": "Telegram message",
+	"Description": "Telegram log or message sender",
+	"Category": "Telegram",
+	"CreatedBy": "Awesomium Team LLC",
+	"CreatedByURL": "https://mrkubu.github.io",
+	"DocsURL": "https://tlgrm.ru/docs/bots/api",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/2bb60d1f6f4842ee846ca03117700d8c",
+	"SupportURL": "https://discord.com/invite/Faw5rRWhyd",
+	"EngineVersion": "4.27.0",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TelegramMessage",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Win32",
+				"Mac",
+				"Linux",
+				"XboxOne",
+				"PS4",
+				"IOS",
+				"Android",
+				"HTML5",
+				"AllDesktop",
+				"TVOS",
+				"Switch"
+			]
+		}
+	]
+}

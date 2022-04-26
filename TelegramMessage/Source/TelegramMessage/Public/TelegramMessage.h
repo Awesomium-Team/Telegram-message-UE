@@ -1,0 +1,12 @@
+// Copyright 2022 Awesomium team LLC. All Rights Reserved.
+
+#pragma once
+
+#include "Modules/ModuleManager.h"
+
+class FTelegramMessageModule : public IModuleInterface
+{
+public:
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+};
