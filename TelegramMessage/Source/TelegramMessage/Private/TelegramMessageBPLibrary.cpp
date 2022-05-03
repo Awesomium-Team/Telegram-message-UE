@@ -26,8 +26,8 @@
 //sendVenue   	 -- https://tlgrm.ru/docs/bots/api#sendvenue	+
 //sendContact    -- https://tlgrm.ru/docs/bots/api#sendcontact 	+
 //sendMessage    -- https://tlgrm.ru/docs/bots/api#sendmessage 	+
-//sendDice		 -- https://core.telegram.org/bots/api#senddice +
-//sendPoll		 -- https://core.telegram.org/bots/api#sendpoll - (Testing) (WIP)
+//sendDice	 -- https://core.telegram.org/bots/api#senddice +
+//sendPoll	 -- https://core.telegram.org/bots/api#sendpoll - (Testing) (WIP)
 //sendchAtaction --https://tlgrm.ru/docs/bots/api#sendchataction +- (STATUS)
 
 // Callback (Debug info) / Дебаг подлючения [TODO]
@@ -126,20 +126,22 @@ void UTelegramMessageBPLibrary::SendTelegramPoll(
 	const FString& Token,
 	const FString& ChatID,
 	const FString& Question,
-	const TArray<FString>& Options
+	//const TArray<FString>& Options
+	const FString& Options
 	)
 {
 	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 
-	UE_LOG(LogTemp, Warning, TEXT("%s"), Options.GetData() );
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), Options.GetData() );
 
-	Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
-	Request->SetVerb(Verb);
-	Request->SetURL(TGBot + Token / MSendPoll + MChatID + ChatID + PQuestions + Question + POptions + *Options.GetData());
+	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
+	//Request->SetVerb(Verb);
+	//Request->SetURL(TGBot + Token / MSendPoll + MChatID + ChatID + PQuestions + Question + POptions + *Options.GetData());
 
-	//Request->SetVerb("POST");
+	Request->SetVerb("POST");
 	//Request->SetURL(TEXT("https://api.telegram.org/bot") + Token + TEXT("/sendPoll?chat_id=") + ChatID + TEXT("&question=") + Question + TEXT("&options=") + *Options.GetData());
-	//Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token + TEXT("/sendPoll?chat_id=") + ChatID + TEXT("&question=") + Question + TEXT("&options=") + Options);
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->ProcessRequest();
 };
 
