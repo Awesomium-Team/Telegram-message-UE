@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Containers/UnrealString.h"
 #include "CoreMinimal.h"
 #include "HttpModule.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
@@ -15,7 +16,7 @@
 UENUM(BlueprintType)
 enum class EStatus : uint8
 {
-	typing					UMETA(DisplayName = "Typing"),
+	typing				UMETA(DisplayName = "Typing"),
 	upload_photo			UMETA(DisplayName = "Upload Photo"),
 	record_video			UMETA(DisplayName = "Recording video"),
 	upload_video			UMETA(DisplayName = "Upload video"),
@@ -43,35 +44,35 @@ protected:
 	// Telegram API
 	FString TGBot			= TEXT("https://api.telegram.org/bot");
 
-	// Symbols / Символы
+	// Symbols / Г‘ГЁГ¬ГўГ®Г«Г»
 	FString SQuestion		= TEXT("?");
 	FString SAmpersand		= TEXT("&");
 	FString SEquals			= TEXT("=");
 
-	// Sended parametr / Параметры для отправки
-	//Message|Сообщения
+	// Sended parametr / ГЏГ Г°Г Г¬ГҐГІГ°Г» Г¤Г«Гї Г®ГІГЇГ°Г ГўГЄГЁ
+	//Message|Г‘Г®Г®ГЎГ№ГҐГ­ГЁГї
 	FString PText			= TEXT("&text=");
 	//Contact
 	FString PNumber			= TEXT("&phone_number=");
 	FString PFName			= TEXT("&first_name=");
-	//Location + Venue|Геолокация
-	FString PX				= TEXT("&latitude=");
-	FString PY				= TEXT("&longitude=");
+	//Location + Venue|ГѓГҐГ®Г«Г®ГЄГ Г¶ГЁГї
+	FString PX			= TEXT("&latitude=");
+	FString PY			= TEXT("&longitude=");
 	FString PStreet			= TEXT("&title=");
 	FString PAddress		= TEXT("&address=");
-	//Poll|Голосование
+	//Poll|ГѓГ®Г«Г®Г±Г®ГўГ Г­ГЁГҐ
 	FString PQuestions		= TEXT("&question=");
-	FString POptions			= TEXT("&options=");
-	//Action|Статус бота/действие бота
-	FString PAction			= TEXT("&aсtion=");
+	FString POptions		= TEXT("&options=");
+	//Action|Г‘ГІГ ГІГіГ± ГЎГ®ГІГ /Г¤ГҐГ©Г±ГІГўГЁГҐ ГЎГ®ГІГ 
+	FString PAction			= TEXT("&aГ±tion=");
 
 
-	// Methods / Режимы работы
+	// Methods / ГђГҐГ¦ГЁГ¬Г» Г°Г ГЎГ®ГІГ»
 	FString MChatID			= TEXT("chat_id=");
 
-	FString MSendMessage	= TEXT("sendMessage?");
-	FString MSendContact	= TEXT("sendContact?");
-	FString MSendLocation	= TEXT("sendLocation?");
+	FString MSendMessage		= TEXT("sendMessage?");
+	FString MSendContact		= TEXT("sendContact?");
+	FString MSendLocation		= TEXT("sendLocation?");
 	FString MSendVenue		= TEXT("sendVenue?");
 	FString MSendDice		= TEXT("sendDice?");
 	FString MSendPhoto		= TEXT("sendPhoto?");
@@ -83,7 +84,7 @@ protected:
 	FString MSendAction		= TEXT("sendChatAction?");
 	FString MSendPoll		= TEXT("sendPoll?");
 
-	// Callback / Ответ от сервера
+	// Callback / ГЋГІГўГҐГІ Г®ГІ Г±ГҐГ°ГўГҐГ°Г 
 	virtual void OnRequestFinish(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded);
 
 public:
