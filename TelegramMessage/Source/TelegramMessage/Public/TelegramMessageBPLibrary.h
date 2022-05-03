@@ -44,18 +44,18 @@ protected:
 	// Telegram API
 	FString TGBot			= TEXT("https://api.telegram.org/bot");
 
-	// Symbols / Ñèìâîëû
+	// Symbols / Символы
 	FString SQuestion		= TEXT("?");
 	FString SAmpersand		= TEXT("&");
 	FString SEquals			= TEXT("=");
 
-	// Sended parametr / Ïàðàìåòðû äëÿ îòïðàâêè
-	//Message|Ñîîáùåíèÿ
+	// Sended parametr / Параметры для отправки
+	//Message / Сообщения
 	FString PText			= TEXT("&text=");
 	//Contact
 	FString PNumber			= TEXT("&phone_number=");
 	FString PFName			= TEXT("&first_name=");
-	//Location + Venue|Ãåîëîêàöèÿ
+	//Location + Venue / Геолокация
 	FString PX			= TEXT("&latitude=");
 	FString PY			= TEXT("&longitude=");
 	FString PStreet			= TEXT("&title=");
@@ -63,11 +63,11 @@ protected:
 	//Poll|Ãîëîñîâàíèå
 	FString PQuestions		= TEXT("&question=");
 	FString POptions		= TEXT("&options=");
-	//Action|Ñòàòóñ áîòà/äåéñòâèå áîòà
+	//Action / Статус бота / действие бота
 	FString PAction			= TEXT("&añtion=");
 
 
-	// Methods / Ðåæèìû ðàáîòû
+	// Methods / Режимы работы
 	FString MChatID			= TEXT("chat_id=");
 
 	FString MSendMessage		= TEXT("sendMessage?");
@@ -84,7 +84,7 @@ protected:
 	FString MSendAction		= TEXT("sendChatAction?");
 	FString MSendPoll		= TEXT("sendPoll?");
 
-	// Callback / Îòâåò îò ñåðâåðà
+	// Callback / Ответ от сервера
 	virtual void OnRequestFinish(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded);
 
 public:
