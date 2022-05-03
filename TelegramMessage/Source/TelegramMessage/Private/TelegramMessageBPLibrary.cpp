@@ -1,6 +1,8 @@
 // Copyright 2022 Awesomium team LLC. All Rights Reserved.
 
 #include "TelegramMessageBPLibrary.h"
+#include "Misc/Paths.h"
+#include "Containers/UnrealString.h"
 #include "HttpModule.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
