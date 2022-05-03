@@ -27,8 +27,8 @@
 ------
 
 ### In the future it is planned:
-*Send poll
-*Getting callback
+* Send poll (At the moment, you can only send String on parametr(non auto))
+* Getting callback
 
 ------
 [Marketplace](https://www.unrealengine.com/marketplace/en-US/product/telegram-message)
