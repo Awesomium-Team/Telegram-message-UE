@@ -185,7 +185,8 @@ public:
 			const FString& Token,
 			const FString& ChatID,
 			const FString& Question,
-			const TArray<FString>& Options
+			//const TArray<FString>& Options
+			const FString& Options
 		);
 
 };
