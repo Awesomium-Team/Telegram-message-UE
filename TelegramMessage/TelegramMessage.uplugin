@@ -10,7 +10,7 @@
 	"DocsURL": "https://tlgrm.ru/docs/bots/api",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/2bb60d1f6f4842ee846ca03117700d8c",
 	"SupportURL": "https://discord.com/invite/Faw5rRWhyd",
-	"EngineVersion": "4.27.0",
+	"EngineVersion": "5,3",
 	"CanContainContent": false,
 	"IsBetaVersion": true,
 	"IsExperimentalVersion": false,
