@@ -1,4 +1,4 @@
-// Copyright 2022 Awesomium team LLC. All Rights Reserved.
+// Copyright 2024 Awesomium team LLC. All Rights Reserved.
 
 #include "TelegramMessageBPLibrary.h"
 #include "Misc/Paths.h"
@@ -8,6 +8,7 @@
 #include "Dom/JsonValue.h"
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonWriter.h"
+#include "Misc/FeedbackContextMarkup.h" // For FMarkup::URLEncode
 #include "Serialization/JsonSerializer.h"
 
 //application/x-www-form-urlencoded
@@ -26,46 +27,68 @@
 //sendVenue   	 -- https://tlgrm.ru/docs/bots/api#sendvenue	+
 //sendContact    -- https://tlgrm.ru/docs/bots/api#sendcontact 	+
 //sendMessage    -- https://tlgrm.ru/docs/bots/api#sendmessage 	+
-//sendDice	 -- https://core.telegram.org/bots/api#senddice +
-//sendPoll	 -- https://core.telegram.org/bots/api#sendpoll - (Testing) (WIP)
-//sendchAtaction --https://tlgrm.ru/docs/bots/api#sendchataction +- (STATUS)
+//sendDice	 	 -- https://core.telegram.org/bots/api#senddice +
+//sendPoll	 	 -- https://core.telegram.org/bots/api#sendpoll +
+//sendchAtaction --https://tlgrm.ru/docs/bots/api#sendchataction+
 
-// Callback (Debug info) / Дебаг подлючения [TODO]
+// Callback (Debug info)
 void UTelegramMessageBPLibrary::OnRequestFinish(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded)
 {
 	if (bSucceeded)
 	{
-		// GOOD Http / Всё ок с соединением
+		// GOOD Http
 		FString JSONString = HttpResponse->GetContentAsString();
 		UE_LOG(LogTemp, Log, TEXT("HTTP Send and getted: %s"), *JSONString);
 	}
 	else
 	{
-		// ERROR Http / Ошибка отправки
+		// ERROR Http
 		UE_LOG(LogTemp, Error, TEXT("HTTP ERROR: Not sended (Couldn't connect to server)"));
 	}
 }
 
-// Message / Сообщение
+// Message
 void UTelegramMessageBPLibrary::SendTelegramMessage(
 	const FString& Token,
 	const FString& ChatID,
 	const FString& Message
 	)
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest(); // TEMPED on static void / Временное ГОВНО во время режима статика у void 
+	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest(); // TEMPED on static void
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
 	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish); [WIP virtual void or void]
 	Request->SetVerb("GET");
 	//Request->SetVerb(Verb); [WIP virtual void or void]
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendMessage?chat_id=") + ChatID + TEXT("&text=") + Message);
+	Request->SetURL(
+		TEXT("https://api.telegram.org/bot") 
+		+ Token / TEXT("sendMessage?chat_id=") 
+		+ ChatID 
+		+ TEXT("&text=") 
+		+ FGenericPlatformHttp::UrlEncode(Message)
+	);
 	//Request->SetURL(TGBot + Token / MSendMessage + MChatID + ChatID + PText + Message); [WIP virtual void or void]
 	Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
 
 	//UE_LOG(LogTemp, Log, TEXT("Debug: %s"), *FString(TGBot + Token / MSendMessage + MChatID + ChatID + PText + Message)); // DEBUG
 };
 
-// Contact / Контакты
+// Contact
 void UTelegramMessageBPLibrary::SendTelegramContact(
 	const FString& Token,
 	const FString& ChatID,
@@ -73,17 +96,42 @@ void UTelegramMessageBPLibrary::SendTelegramContact(
 	const FString& Number
 	)
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
 	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
 	Request->SetVerb("GET");
 	//Request->SetVerb(Verb);
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendContact?chat_id=") + ChatID + TEXT("&phone_number=") + Number + TEXT("&first_name=") + NameContact);
+	Request->SetURL(
+		TEXT("https://api.telegram.org/bot") 
+		+ Token / TEXT("sendContact?chat_id=") 
+		+ ChatID 
+		+ TEXT("&phone_number=") 
+		+ Number 
+		+ TEXT("&first_name=") 
+		+ FGenericPlatformHttp::UrlEncode(NameContact)
+	);
 	//Request->SetURL(TGBot + Token / MSendContact + MChatID + ChatID + PNumber + Number + PFName + NameContact);
 	Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
+
 };
 
-// Location / Локация
+// Location
 void UTelegramMessageBPLibrary::SendTelegramLocation(
 	const FString& Token,
 	const FString& ChatID,
@@ -91,17 +139,42 @@ void UTelegramMessageBPLibrary::SendTelegramLocation(
 	const FString& Longitude
 	)
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 
 	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
 	Request->SetVerb("GET");
 	//Request->SetVerb(Verb);
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendLocation?chat_id=") + ChatID + TEXT("&latitude=") + Latitude + TEXT("&longitude=") + Longitude);
+	Request->SetURL(
+		TEXT("https://api.telegram.org/bot") 
+		+ Token / TEXT("sendLocation?chat_id=") 
+		+ ChatID 
+		+ TEXT("&latitude=") 
+		+ Latitude 
+		+ TEXT("&longitude=") 
+		+ Longitude
+	);
 	//Request->SetURL(TGBot + Token / MSendLocation + MChatID + ChatID + PX + Latitude + PY + Longitude);
 	Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
+
 };
 
-// Venue / Локация с описанием
+// Venue
 void UTelegramMessageBPLibrary::SendTelegramVenue(
 	const FString& Token,
 	const FString& ChatID,
@@ -109,313 +182,297 @@ void UTelegramMessageBPLibrary::SendTelegramVenue(
 	const FString& Longitude,
 	const FString& Title,
 	const FString& Address
-	)
+)
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 
 	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
 	Request->SetVerb("GET");
 	//Request->SetVerb(Verb);
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendVenue?chat_id=") + ChatID + TEXT("&latitude=") + Latitude + TEXT("&longitude=") + Longitude + TEXT("&title=") + Title + TEXT("&address=") + Address);
+	Request->SetURL(
+		TEXT("https://api.telegram.org/bot") 
+		+ Token / TEXT("sendVenue?chat_id=") 
+		+ ChatID 
+		+ TEXT("&latitude=") 
+		+ Latitude 
+		+ TEXT("&longitude=") 
+		+ Longitude 
+		+ TEXT("&title=") 
+		+ FGenericPlatformHttp::UrlEncode(Title) 
+		+ TEXT("&address=")
+		+ FGenericPlatformHttp::UrlEncode(Address) 
+	);
 	//Request->SetURL(TGBot + Token / MSendVenue + MChatID + ChatID + PX + Latitude + PY + Longitude + PStreet + Title + PAddress + Address);
 	Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
+
 };
 
-// Poll / Голосование (WIP)
+// Poll
 void UTelegramMessageBPLibrary::SendTelegramPoll(
-	const FString& Token,
-	const FString& ChatID,
-	const FString& Question,
-	//const TArray<FString>& Options
-	const FString& Options
-	)
+    const FString& Token,
+    const FString& ChatID,
+    const FString& Question,
+    const TArray<FString>& Options
+)
 {
 	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), Options.GetData() );
+    // Array to Json
+    FString OptionsJson = TEXT("[");
+    for (int32 i = 0; i < Options.Num(); i++)
+    {
+        OptionsJson += TEXT("\"") + Options[i].Replace(TEXT("\""), TEXT("\\\"")) + TEXT("\"");
+        if (i < Options.Num() - 1)
+        {
+            OptionsJson += TEXT(",");
+        }
+    }
+    OptionsJson += TEXT("]");
 
-	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
-	//Request->SetVerb(Verb);
-	//Request->SetURL(TGBot + Token / MSendPoll + MChatID + ChatID + PQuestions + Question + POptions + *Options.GetData());
+    Request->SetVerb("POST");
+    Request->SetURL(TEXT("https://api.telegram.org/bot") + Token + TEXT("/sendPoll"));
 
-	Request->SetVerb("POST");
-	//Request->SetURL(TEXT("https://api.telegram.org/bot") + Token + TEXT("/sendPoll?chat_id=") + ChatID + TEXT("&question=") + Question + TEXT("&options=") + *Options.GetData());
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token + TEXT("/sendPoll?chat_id=") + ChatID + TEXT("&question=") + Question + TEXT("&options=") + Options);
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->ProcessRequest();
-};
+    FString RequestContent = TEXT("chat_id=") 
+							+ ChatID 
+							+ TEXT("&question=") + FGenericPlatformHttp::UrlEncode(Question) 
+							+ TEXT("&options=") + FGenericPlatformHttp::UrlEncode(OptionsJson);
 
-// Dice / Кости
+    Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+    Request->SetContentAsString(RequestContent);
+    Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
+
+}
+
+// Dice
 void UTelegramMessageBPLibrary::SendTelegramDice(
 	const FString& Token,
 	const FString& ChatID
 )
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
 	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
 	Request->SetVerb("GET");
 	//Request->SetVerb(Verb);
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendDice?chat_id=") + ChatID);
+	Request->SetURL(
+		TEXT("https://api.telegram.org/bot") 
+		+ Token / TEXT("sendDice?chat_id=") 
+		+ FGenericPlatformHttp::UrlEncode(ChatID)
+	);
 	//Request->SetURL(TGBot + Token / MSendDice + MChatID + ChatID);
 	Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
+
 };
 
-// Action status / Чат статус | (typing) for text messages, (upload_photo) for photos, (record_video) or (upload_video) for videos, (record_audio) or (upload_audio) for audio files, (upload_document) for general files, (find_location) for location data
+// Action status / (typing) for text messages, (upload_photo) for photos, (record_video) or (upload_video) for videos, (record_audio) or (upload_audio) for audio files, (upload_document) for general files, (find_location) for location data
 void UTelegramMessageBPLibrary::SendTelegramAction(
 	const FString& Token,
 	const FString& ChatID,
-	const FString& Action
-	//const EStatus& Action
+	const EStatus Action
 	)
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 
-	Request->SetTimeout(15);
+	// EStatus - String
+    const UEnum* EnumStatusPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EStatus"), true);
+    FString ActionStr = (EnumStatusPtr != nullptr) ? EnumStatusPtr->GetNameStringByValue((int64)Action) : TEXT("");
+
+	//Request->SetTimeout(15);
 	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
 	Request->SetVerb("GET");
 	//Request->SetVerb(Verb);
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendChatAction?chat_id=") + ChatID + TEXT("&action=") + Action);
+	Request->SetURL(
+		TEXT("https://api.telegram.org/bot") 
+		+ Token / TEXT("sendChatAction?chat_id=") 
+		+ ChatID 
+		+ TEXT("&action=") 
+		+ ActionStr
+	);
 	//Request->SetURL(TGBot + Token / MSendAction + MChatID + ChatID + PAction + Action);
 	Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
+
 };
 
-// Photo / Фото
-void UTelegramMessageBPLibrary::SendTelegramPhoto(
-	const FString& Token,
-	const FString& ChatID,
-	const FString& Photo
+// HELPER FUNCTION (File to bytes)
+TArray<uint8> UTelegramMessageBPLibrary::PrepareRequestContent(
+	const FString& Boundary, 
+	const TArray<uint8>& FileContent, 
+	const FString& FileName,
+	const FString& FieldName
 )
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendPhoto?chat_id=") + ChatID);
+	TArray<uint8> RequestContent;
 
-	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
-	//Request->SetVerb(Verb);
-	//Request->SetURL(TGBot + Token / MSendVenue + MChatID + ChatID + MSendPhoto);
-	//Request->ProcessRequest();
+	// Formatting (Start)
+	FString BeginBoundary = "\r\n--" + Boundary + "\r\n";
+	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*BeginBoundary), BeginBoundary.Len());
 
-	// Форматирование и запрс
+	// Start header
+	FString FileHeader = "Content-Disposition: form-data; name=\"" + FieldName + "\"; filename=\"" + FileName + "\"\r\n";
+	FileHeader.Append("Content-Type: \r\n\r\n");
+	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*FileHeader), FileHeader.Len());
+
+	// File
+	RequestContent.Append(FileContent);
+
+	// Formatting (End)
+	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
+	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*EndBoundary), EndBoundary.Len());
+
+	return RequestContent;
+}
+
+// Upload files (50mb max)
+void UTelegramMessageBPLibrary::SendTelegramFiles(
+	const FString& Token,
+	const FString& ChatID,
+	const ESendFile SendFile,
+	const FString& FilePath
+)
+{
+
+	// EStatus - String
+    const UEnum* EnumSendPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ESendFile"), true);
+    FString EnumSendStr = EnumSendPtr ? EnumSendPtr->GetNameStringByValue((int64)SendFile) : TEXT("");
+	FString ActionStrWithoutPrefix = EnumSendStr;
+
+	//TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / EnumSendStr + TEXT("?chat_id=") + ChatID);
+
+	// Formatting
 	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
 	Request->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary =" + Boundary));
 	Request->SetVerb(TEXT("POST"));
 
-	TArray<uint8> RequestContent;
+	// Delete prefix "send" and lowercase
+    ActionStrWithoutPrefix.RemoveFromStart(TEXT("send"));
+    if (ActionStrWithoutPrefix.Len() > 0)
+    {
+        ActionStrWithoutPrefix[0] = FChar::ToLower(ActionStrWithoutPrefix[0]);
+    }
 
-	// Байт на файл
 	TArray<uint8> FileContent;
-	if (FFileHelper::LoadFileToArray(FileContent, *Photo))
+	if (FFileHelper::LoadFileToArray(FileContent, *FilePath))
 	{
-		// Начало форматирования
-		FString BeginBoundry = "\r\n--" + Boundary + "\r\n";
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*BeginBoundry), BeginBoundry.Len());
-
-		// Начало для фотки
-		FString FileHeader = "Content-Disposition: form-data;name=\"photo\";";
-		FileHeader.Append("filename=\"" + FPaths::GetCleanFilename(Photo) + "\"\r\n");
-		FileHeader.Append("Content-Type: \r\n\r\n");
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*FileHeader), FileHeader.Len());
-
-		// Сам файл
-		RequestContent.Append(FileContent);
+		TArray<uint8> RequestContent = PrepareRequestContent(Boundary, FileContent, FPaths::GetCleanFilename(FilePath), ActionStrWithoutPrefix);
+		Request->SetContent(RequestContent);
 	}
 
-	// Заканчиваем форматирование
-	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
-	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*EndBoundary), EndBoundary.Len());
-
-	Request->SetContent(RequestContent);
 	Request->ProcessRequest();
+
+	// Callback (Debug info)
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		if (bWasSuccessful && Response.IsValid())
+		{
+			// Callback request
+			UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message: %s"), *Response->GetContentAsString());
+		}
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message: Not sended (Couldn't connect to server)"));
+		}
+	});
 
 };
 
-// Audio / Аудиозаписи
-void UTelegramMessageBPLibrary::SendTelegramAudio(
-	const FString& Token,
-	const FString& ChatID,
-	const FString& Audio
+void UTelegramMessageBPLibrary::GetTelegramUpdates(
+    const FString& Token,
+    const FString& Offset,
+    const FString& Limit,
+    const FString& Timeout
 )
 {
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendAudio?chat_id=") + ChatID);
+    //TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+    Request->SetVerb("GET");
 
-	// Форматирование и запрс
-	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
-	Request->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary =" + Boundary));
-	Request->SetVerb(TEXT("POST"));
 
-	TArray<uint8> RequestContent;
+    FString Url = FString::Printf(TEXT("https://api.telegram.org/bot%s/getUpdates?offset=%s&limit=%s&timeout=%s"), 
+                                  *Token, 
+                                  *Offset, 
+                                  *Limit, 
+                                  *Timeout);
+    Request->SetURL(Url);
+    Request->ProcessRequest();
 
-	TArray<uint8> FileContent;
-	if (FFileHelper::LoadFileToArray(FileContent, *Audio))
-	{
-		FString BeginBoundry = "\r\n--" + Boundary + "\r\n";
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*BeginBoundry), BeginBoundry.Len());
-
-		FString FileHeader = "Content-Disposition: form-data;name=\"audio\";";
-		FileHeader.Append("filename=\"" + FPaths::GetCleanFilename(Audio) + "\"\r\n");
-		FileHeader.Append("Content-Type: \r\n\r\n");
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*FileHeader), FileHeader.Len());
-
-		RequestContent.Append(FileContent);
-	}
-
-	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
-	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*EndBoundary), EndBoundary.Len());
-
-	Request->SetContent(RequestContent);
-	Request->ProcessRequest();
-
-};
-
-// Video / Видеозаписи
-void UTelegramMessageBPLibrary::SendTelegramVideo(
-	const FString& Token,
-	const FString& ChatID,
-	const FString& Video
-)
-{
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendVideo?chat_id=") + ChatID);
-
-	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
-	Request->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary =" + Boundary));
-	Request->SetVerb(TEXT("POST"));
-
-	TArray<uint8> RequestContent;
-
-	TArray<uint8> FileContent;
-	if (FFileHelper::LoadFileToArray(FileContent, *Video))
-	{
-		FString BeginBoundry = "\r\n--" + Boundary + "\r\n";
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*BeginBoundry), BeginBoundry.Len());
-
-		FString FileHeader = "Content-Disposition: form-data;name=\"video\";";
-		FileHeader.Append("filename=\"" + FPaths::GetCleanFilename(Video) + "\"\r\n");
-		FileHeader.Append("Content-Type: \r\n\r\n");
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*FileHeader), FileHeader.Len());
-
-		RequestContent.Append(FileContent);
-	}
-
-	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
-	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*EndBoundary), EndBoundary.Len());
-
-	Request->SetContent(RequestContent);
-	Request->ProcessRequest();
-
-};
-
-// Voice / Голосовое сообщение
-void UTelegramMessageBPLibrary::SendTelegramVoice(
-	const FString& Token,
-	const FString& ChatID,
-	const FString& Audio
-)
-{
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendVoice?chat_id=") + ChatID);
-
-	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
-	Request->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary =" + Boundary));
-	Request->SetVerb(TEXT("POST"));
-
-	TArray<uint8> RequestContent;
-
-	TArray<uint8> FileContent;
-	if (FFileHelper::LoadFileToArray(FileContent, *Audio))
-	{
-		FString BeginBoundry = "\r\n--" + Boundary + "\r\n";
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*BeginBoundry), BeginBoundry.Len());
-
-		FString FileHeader = "Content-Disposition: form-data;name=\"voice\";";
-		FileHeader.Append("filename=\"" + FPaths::GetCleanFilename(Audio) + "\"\r\n");
-		FileHeader.Append("Content-Type: \r\n\r\n");
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*FileHeader), FileHeader.Len());
-
-		RequestContent.Append(FileContent);
-	}
-
-	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
-	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*EndBoundary), EndBoundary.Len());
-
-	Request->SetContent(RequestContent);
-	Request->ProcessRequest();
-
-};
-
-// Document / Документ до 50 мб
-void UTelegramMessageBPLibrary::SendTelegramDocument(
-	const FString& Token,
-	const FString& ChatID,
-	const FString& Document
-)
-{
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendDocument?chat_id=") + ChatID);
-
-	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
-	Request->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary =" + Boundary));
-	Request->SetVerb(TEXT("POST"));
-
-	TArray<uint8> RequestContent;
-
-	TArray<uint8> FileContent;
-	if (FFileHelper::LoadFileToArray(FileContent, *Document))
-	{
-		FString BeginBoundry = "\r\n--" + Boundary + "\r\n";
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*BeginBoundry), BeginBoundry.Len());
-
-		FString FileHeader = "Content-Disposition: form-data;name=\"document\";";
-		FileHeader.Append("filename=\"" + FPaths::GetCleanFilename(Document) + "\"\r\n");
-		FileHeader.Append("Content-Type: \r\n\r\n");
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*FileHeader), FileHeader.Len());
-
-		RequestContent.Append(FileContent);
-	}
-
-	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
-	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*EndBoundary), EndBoundary.Len());
-
-	Request->SetContent(RequestContent);
-	Request->ProcessRequest();
-
-};
-
-// Sticker / Стикер
-void UTelegramMessageBPLibrary::SendTelegramSticker(
-	const FString& Token,
-	const FString& ChatID,
-	const FString& Sticker
-)
-{
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / TEXT("sendSticker?chat_id=") + ChatID);
-
-	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
-	Request->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary =" + Boundary));
-	Request->SetVerb(TEXT("POST"));
-
-	TArray<uint8> RequestContent;
-
-	TArray<uint8> FileContent;
-	if (FFileHelper::LoadFileToArray(FileContent, *Sticker))
-	{
-		FString BeginBoundry = "\r\n--" + Boundary + "\r\n";
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*BeginBoundry), BeginBoundry.Len());
-
-		FString FileHeader = "Content-Disposition: form-data;name=\"sticker\";";
-		FileHeader.Append("filename=\"" + FPaths::GetCleanFilename(Sticker) + "\"\r\n");
-		FileHeader.Append("Content-Type: \r\n\r\n");
-		RequestContent.Append((uint8*)TCHAR_TO_ANSI(*FileHeader), FileHeader.Len());
-
-		RequestContent.Append(FileContent);
-	}
-
-	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
-	RequestContent.Append((uint8*)TCHAR_TO_ANSI(*EndBoundary), EndBoundary.Len());
-
-	Request->SetContent(RequestContent);
-	Request->ProcessRequest();
-
-};
+    Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+    {
+        if (bWasSuccessful && Response.IsValid())
+        {
+            // Print response
+            UE_LOG(LogTemp, Log, TEXT("[Callback]TG Message(BOT): %s"), *Response->GetContentAsString());
+        }
+		else
+		{
+			// Error request
+			UE_LOG(LogTemp, Error, TEXT("[ERROR]TG Message(BOT): Not recived (Couldn't connect to server)"));
+		}
+    });
+}
