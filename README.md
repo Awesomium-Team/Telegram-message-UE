@@ -14,21 +14,15 @@
 * Video, 
 * Sticker, 
 * Voice, 
-* Dice 
-* Bot action(experemental)
+* Dice, 
+* Bot action,
+* Poll,
+* Callbacks
 ------
 ### Demonstration
 [Demo](https://www.youtube.com/watch?v=3mm7bEkrXJE)
 
-[Demo project 4.27](https://drive.google.com/file/d/1oc6lCMODT48vRFqVHQAK39dxhcgl1Bfv/view?usp=sharing)
-
-[Demo project 5.00](https://drive.google.com/file/d/1Jc6KlNGRInXobnBWrwz0shEXG58OvFI4/view?usp=sharing)
-
-------
-
-### In the future it is planned:
-* Send poll (At the moment, you can only send String on parametr(non auto))
-* Getting callback
+[Demo project - in plugin path]
 
 ------
 [Marketplace](https://www.unrealengine.com/marketplace/en-US/product/telegram-message)
@@ -45,11 +39,8 @@ And telegram logos and using free.
 ------
 # Technical information
 ## Code Modules:
- - TelegramMessenger [Runtime]
-  - Number of Blueprints: 0
-  - Number of C++ Classes: 2
 - TelegramMessenger [Runtime]:
-  - Number of Blueprints: 0
+  - Number of Blueprints: 5
   - Number of C++ Classes: 2
   - Network Replicated: Yes
   - Supported Development Platforms: Windows, Linux, Mac, Android, IOS
