@@ -1,4 +1,4 @@
-// Copyright 2022 Awesomium team LLC. All Rights Reserved.
+// Copyright 2024 Awesomium team LLC. All Rights Reserved.
 
 using UnrealBuildTool;
 
