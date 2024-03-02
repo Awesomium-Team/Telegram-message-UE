@@ -316,8 +316,8 @@ void UTelegramMessageBPLibrary::SendTelegramAction(
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 
 	// EStatus - String
-    const UEnum* EnumStatusPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EStatus"), true);
-    FString ActionStr = (EnumStatusPtr != nullptr) ? EnumStatusPtr->GetNameStringByValue((int64)Action) : TEXT("");
+     	//const UEnum* EnumStatusPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EStatus"), true); // 5.0 and lower
+	const UEnum* EnumStatusPtr = FindFirstObjectSafe<UEnum>(TEXT("EStatus")); // 5.1 and higher
 
 	//Request->SetTimeout(15);
 	//Request->OnProcessRequestComplete().BindUObject(this, &UTelegramMessageBPLibrary::OnRequestFinish);
@@ -388,9 +388,9 @@ void UTelegramMessageBPLibrary::SendTelegramFiles(
 )
 {
 
-	// EStatus - String
-    const UEnum* EnumSendPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ESendFile"), true);
-    FString EnumSendStr = EnumSendPtr ? EnumSendPtr->GetNameStringByValue((int64)SendFile) : TEXT("");
+	// ESendFile - String
+    	//const UEnum* EnumSendPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ESendFile"), true); // 5.0 and lower
+	const UEnum* EnumSendPtr = FindFirstObjectSafe<UEnum>(TEXT("ESendFile")); // 5.1 and higher
 	FString ActionStrWithoutPrefix = EnumSendStr;
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
