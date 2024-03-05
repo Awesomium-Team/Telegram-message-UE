@@ -27,8 +27,8 @@
 //sendVenue   	 -- https://tlgrm.ru/docs/bots/api#sendvenue	+
 //sendContact    -- https://tlgrm.ru/docs/bots/api#sendcontact 	+
 //sendMessage    -- https://tlgrm.ru/docs/bots/api#sendmessage 	+
-//sendDice	 	 -- https://core.telegram.org/bots/api#senddice +
-//sendPoll	 	 -- https://core.telegram.org/bots/api#sendpoll +
+//sendDice	 -- https://core.telegram.org/bots/api#senddice +
+//sendPoll	 -- https://core.telegram.org/bots/api#sendpoll +
 //sendchAtaction --https://tlgrm.ru/docs/bots/api#sendchataction+
 
 // Callback (Debug info)
@@ -328,7 +328,7 @@ void UTelegramMessageBPLibrary::SendTelegramAction(
 		+ Token / TEXT("sendChatAction?chat_id=") 
 		+ ChatID 
 		+ TEXT("&action=") 
-		+ ActionStr
+		+ EnumStatusPtr
 	);
 	//Request->SetURL(TGBot + Token / MSendAction + MChatID + ChatID + PAction + Action);
 	Request->ProcessRequest();
@@ -391,10 +391,10 @@ void UTelegramMessageBPLibrary::SendTelegramFiles(
 	// ESendFile - String
     	//const UEnum* EnumSendPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ESendFile"), true); // 5.0 and lower
 	const UEnum* EnumSendPtr = FindFirstObjectSafe<UEnum>(TEXT("ESendFile")); // 5.1 and higher
-	FString ActionStrWithoutPrefix = EnumSendStr;
+	FString ActionStrWithoutPrefix = EnumSendPtr;
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / EnumSendStr + TEXT("?chat_id=") + ChatID);
+	Request->SetURL(TEXT("https://api.telegram.org/bot") + Token / EnumSendPtr + TEXT("?chat_id=") + ChatID);
 
 	// Formatting
 	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
